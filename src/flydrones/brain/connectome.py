@@ -251,7 +251,9 @@ def build_malecns(
     ann = feather.read_table(data_dir / MALECNS_FILES["annotations"]).to_pandas()
     body_col = _pick(ann.columns, "bodyId", "body_id", "body")
     type_col = _pick(ann.columns, "type", "cell_type", "celltype")
-    side_col = _pick(ann.columns, "rootSide", "somaSide", "side", "root_side", "soma_side")
+    root_side_col = _pick(ann.columns, "rootSide", "root_side")
+    soma_side_col = _pick(ann.columns, "somaSide", "soma_side")
+    side_col = _pick(ann.columns, "side")
     sc_col = _pick(ann.columns, "superclass", "super_class")
     status_col = _pick(ann.columns, "status", "statusLabel")
     if body_col is None or type_col is None:
@@ -313,7 +315,19 @@ def build_malecns(
     W = sparse.csc_matrix((vals, (rows, cols)), shape=(n, n), dtype=np.float32)
     log(f"weights: scanned {total:,} rows, kept {W.nnz:,} connections (>= {min_synapses} synapses)")
 
-    sides = ann[side_col].astype(str).str.upper().str[:1].replace({"N": "", "U": ""}).to_numpy() if side_col else np.array([""] * n)
+    if root_side_col or soma_side_col or side_col:
+        # MaleCNS commonly leaves rootSide empty for optic-lobe and descending
+        # neurons while somaSide contains the hemisphere. Resolve this per row,
+        # rather than choosing one column for the whole table.
+        resolved_side = None
+        for col in (root_side_col, soma_side_col, side_col):
+            if not col:
+                continue
+            values = ann[col].replace("", np.nan)
+            resolved_side = values if resolved_side is None else resolved_side.fillna(values)
+        sides = resolved_side.fillna("").astype(str).str.upper().str[:1].replace({"N": "", "U": ""}).to_numpy()
+    else:
+        sides = np.array([""] * n)
     return Connectome(
         name="malecns-v1.0",
         weights=W,

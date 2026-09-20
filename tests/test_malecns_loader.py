@@ -16,7 +16,8 @@ def make_fake(tmp_path):
     ann = pa.table({
         "bodyId": ids,
         "type": ["LPLC2", "LPLC2", "DNp01", "DNg02", "DNg02", "glia-x"],
-        "rootSide": ["L", "R", "L", "L", "R", "L"],
+        "rootSide": [None, "R", "L", "L", None, "L"],
+        "somaSide": ["L", "R", "L", "L", "R", "L"],
         "superclass": ["visual_projection", "visual_projection", "descending", "descending", "descending", ""],
         "status": ["Traced", "Traced", "Traced", "Traced", "Traced", "Glia"],
     })

@@ -1,0 +1,13 @@
+# Real MaleCNS v1.0 sensorimotor core tuned for real-time execution.
+brain:
+  source: data/malecns_core2.npz
+  lif:
+    dt: 1.0
+    noise_mv: 0.0
+  bias:
+    DNg02_L: 8.0
+    DNg02_R: 8.0
+  record_neurons: 200
+
+decoder:
+  settle_s: 2.0

@@ -18,3 +18,8 @@ flight*.csv
 Thumbs.db
 .idea/
 .vscode/
+android/mavic-air-bridge/local.properties
+android/mavic-air-bridge/.gradle/
+android/mavic-air-bridge/app/build/
+.serena/
+*-flight.csv

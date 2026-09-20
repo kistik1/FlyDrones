@@ -22,6 +22,15 @@ flight controller turns that into motor speeds and keeps the airframe level.
 - **Tip:** Tello needs light and a textured floor to hold position. Video over Wi-Fi lags 100-200 ms,
   which slows the looming reflex.
 
+## Original DJI Mavic Air U11X + S01A remote (development only)
+
+- **Status:** dry-run implementation. Do not use it for flight yet.
+- **Architecture:** an Android phone runs DJI Mobile SDK v4.18 and bridges a private laptop hotspot to the remote's USB connection.
+- **Python backend:** `--drone mavic-air --bridge-host PHONE_IP --config configs/mavic_air.yaml`.
+- **Camera:** decoded on Android and returned as downsampled JPEG frames on a separate TCP channel.
+- **Arming:** only the phone UI can enable Virtual Stick. The laptop cannot arm, take off, or initiate landing.
+- **Guide:** [`docs/MAVIC_AIR.md`](MAVIC_AIR.md).
+
 ## Bitcraze Crazyflie 2.1 (+ Flow deck v2)
 
 - **Why:** 27 g, open firmware, safest indoor platform.

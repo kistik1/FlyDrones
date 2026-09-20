@@ -1,0 +1,78 @@
+import java.util.Properties
+
+plugins {
+    id 'com.android.application'
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+def djiApiKey = localProperties.getProperty('DJI_API_KEY', 'MISSING_DJI_API_KEY')
+
+configurations.configureEach {
+    // DJI MSDK 4.18 still brings the pre-1.8 split JDK7/JDK8 stdlib jars.
+    // Modern AndroidX uses the consolidated kotlin-stdlib, which replaces both.
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+
+android {
+    namespace 'com.flydrones.mavicairbridge'
+    compileSdk 34
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId 'com.flydrones.mavicairbridge'
+        minSdk 23
+        // DJI MSDK 4.18 creates a mutable implicit PendingIntent for USB access.
+        // Android 14 rejects that when the app targets API 34.
+        targetSdk 33
+        versionCode 1
+        versionName '0.1.0'
+        multiDexEnabled true
+        manifestPlaceholders = [DJI_API_KEY: djiApiKey]
+        ndk { abiFilters 'armeabi-v7a', 'arm64-v8a' }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+        release {
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        jniLibs { useLegacyPackaging = true }
+        resources {
+            excludes += [
+                    'META-INF/rxjava.properties',
+                    'dji/thirdparty/okhttp3/internal/publicsuffix/publicsuffixes.gz'
+            ]
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation('com.dji:dji-sdk:4.18') {
+        exclude module: 'library-anti-distortion'
+    }
+    // Public API surface used only to compile against DJI's obfuscated runtime.
+    // DJI's official v4 sample requires this to remain compile-only.
+    compileOnly 'com.dji:dji-sdk-provided:4.18'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.core:core:1.12.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+}

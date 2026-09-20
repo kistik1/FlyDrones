@@ -144,6 +144,7 @@ Everything below is a **dry run** (commands printed, nothing sent) until you add
 | drone | install | run | notes |
 |---|---|---|---|
 | **DJI / Ryze Tello** | `pip install -e ".[tello,gestures]"` | `flydrones fly --drone tello --input both --live` | easiest start; its camera becomes the fly's eyes |
+| **Original DJI Mavic Air U11X** | Android bridge + base install | `flydrones fly --drone mavic-air --bridge-host PHONE_IP --config configs/mavic_air.yaml` | development only; use the mock bridge, not an aircraft |
 | **Crazyflie 2.x + Flow deck** | `pip install -e ".[crazyflie,gestures]"` | `flydrones fly --drone crazyflie --input gesture` | 27 g; webcam hand as the eyes |
 | **ArduPilot / PX4** (real or SITL) | `pip install -e ".[mavlink]"` | `flydrones fly --drone mavlink --mavlink udpin:0.0.0.0:14550` | GUIDED / OFFBOARD velocity setpoints |
 | **Betaflight / INAV quad** | flash [`firmware/esp32_msp_bridge`](firmware/esp32_msp_bridge) | `flydrones fly --drone esp32 --input gesture` | ESP32 Wi-Fi → MSP RC override |

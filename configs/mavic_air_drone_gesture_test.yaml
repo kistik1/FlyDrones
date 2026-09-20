@@ -1,0 +1,18 @@
+# First live hand-gesture test through the Mavic Air camera.
+# The brain may rotate the drone slowly, but cannot translate or change height.
+safety:
+  max_throttle: 0.0
+  max_yaw: 0.10
+  max_forward: 0.0
+  max_lateral: 0.0
+  slew_per_s: 0.30
+  min_alt_m: 0.4
+  max_alt_m: 1.0
+  geofence_radius_m: 2.0
+  brain_timeout_s: 0.25
+  min_battery_pct: 10
+  max_flight_s: 180
+
+control:
+  hz: 20
+  takeoff: false

@@ -1,0 +1,4 @@
+# Copy this file to local.properties. Do not commit the real key.
+# The package registered in DJI Developer must be com.flydrones.mavicairbridge.
+sdk.dir=/path/to/Android/Sdk
+DJI_API_KEY=replace-with-your-dji-mobile-sdk-v4-app-key

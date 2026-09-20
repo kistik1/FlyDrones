@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spikecalls.github.io/FlyDrones/protocol/bridge-v1.schema.json",
+  "title": "FlyDrones Android bridge protocol v1",
+  "oneOf": [
+    { "$ref": "#/$defs/hello" },
+    { "$ref": "#/$defs/status" },
+    { "$ref": "#/$defs/command" },
+    { "$ref": "#/$defs/disarm" },
+    { "$ref": "#/$defs/videoHello" }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": ["version", "type"],
+      "properties": { "version": { "const": 1 }, "type": { "type": "string" } }
+    },
+    "token": { "type": "string", "minLength": 16, "maxLength": 128 },
+    "axis": { "type": "number", "minimum": -1, "maximum": 1 },
+    "hello": {
+      "allOf": [{ "$ref": "#/$defs/base" }],
+      "required": ["version", "type", "client_nonce"],
+      "properties": {
+        "version": { "const": 1 }, "type": { "const": "hello" },
+        "client_nonce": { "$ref": "#/$defs/token" }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "allOf": [{ "$ref": "#/$defs/base" }],
+      "required": ["version", "type", "client_nonce", "token", "connected", "armed", "flying"],
+      "properties": {
+        "version": { "const": 1 }, "type": { "const": "status" },
+        "client_nonce": { "$ref": "#/$defs/token" }, "token": { "$ref": "#/$defs/token" },
+        "connected": { "type": "boolean" }, "armed": { "type": "boolean" }, "flying": { "type": "boolean" },
+        "product": { "type": "string" }, "battery_pct": { "type": ["number", "null"] },
+        "alt_m": { "type": ["number", "null"] }, "vz_mps": { "type": ["number", "null"] },
+        "yaw_deg": { "type": ["number", "null"] }, "yaw_rate_dps": { "type": ["number", "null"] }
+      }
+    },
+    "command": {
+      "allOf": [{ "$ref": "#/$defs/base" }],
+      "required": ["version", "type", "token", "seq", "timestamp_ms", "throttle", "yaw", "forward", "lateral"],
+      "properties": {
+        "version": { "const": 1 }, "type": { "const": "command" }, "token": { "$ref": "#/$defs/token" },
+        "seq": { "type": "integer", "minimum": 1 }, "timestamp_ms": { "type": "integer", "minimum": 0 },
+        "throttle": { "$ref": "#/$defs/axis" }, "yaw": { "$ref": "#/$defs/axis" },
+        "forward": { "$ref": "#/$defs/axis" }, "lateral": { "$ref": "#/$defs/axis" }
+      },
+      "additionalProperties": false
+    },
+    "disarm": {
+      "allOf": [{ "$ref": "#/$defs/base" }],
+      "required": ["version", "type", "token", "reason"],
+      "properties": { "version": { "const": 1 }, "type": { "const": "disarm" }, "token": { "$ref": "#/$defs/token" }, "reason": { "type": "string", "maxLength": 200 } },
+      "additionalProperties": false
+    },
+    "videoHello": {
+      "allOf": [{ "$ref": "#/$defs/base" }],
+      "required": ["version", "type", "token"],
+      "properties": { "version": { "const": 1 }, "type": { "const": "video_hello" }, "token": { "$ref": "#/$defs/token" } },
+      "additionalProperties": false
+    }
+  }
+}

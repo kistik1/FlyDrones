@@ -1,0 +1,17 @@
+# Conservative first-pass limits for the original Mavic Air Android bridge.
+safety:
+  max_throttle: 0.20
+  max_yaw: 0.20
+  max_forward: 0.15
+  max_lateral: 0.15
+  slew_per_s: 0.60
+  min_alt_m: 0.5
+  max_alt_m: 1.5
+  geofence_radius_m: 2.0
+  brain_timeout_s: 0.25
+  min_battery_pct: 35
+  max_flight_s: 30
+
+control:
+  hz: 20
+  takeoff: false

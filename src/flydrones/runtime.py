@@ -35,13 +35,15 @@ class TickInfo:
 class Pilot:
     """One brain flying one drone."""
 
-    def __init__(self, brain: Brain, drone: Drone, cfg: dict, gestures=None, webcam=None, name: str = "fly-1"):
+    def __init__(self, brain: Brain, drone: Drone, cfg: dict, gestures=None, webcam=None,
+                 gesture_from_drone: bool = False, name: str = "fly-1"):
         self.name = name
         self.brain = brain
         self.drone = drone
         self.cfg = cfg
         self.gestures = gestures
         self.webcam = webcam
+        self.gesture_from_drone = gesture_from_drone
         self.retina = Retina.from_config(cfg)
         self.encoder = InputEncoder(brain.connectome, cfg)
         self.decoder = MotorDecoder(cfg)
@@ -70,7 +72,8 @@ class Pilot:
         vision = self.retina.encode(frame)
         g = None
         if self.gestures is not None:
-            g = self.gestures.read(t, cam)
+            gesture_frame = frame if self.gesture_from_drone else cam
+            g = self.gestures.read(t, gesture_frame)
             vision = self.illusion.apply(vision, g, t)
         tel = self.drone.telemetry()
         inputs = self.encoder.encode(vision, tel.yaw_rate_dps)

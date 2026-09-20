@@ -145,6 +145,10 @@ def cmd_fly(args) -> int:
         kw = {"connection": args.mavlink, "autopilot": args.autopilot}
     elif args.drone == "esp32":
         kw = {"host": args.esp32_host}
+    elif args.drone == "mavic-air":
+        if args.send and not args.bridge_host:
+            raise SystemExit("--bridge-host is required with --drone mavic-air --send")
+        kw = {"host": args.bridge_host, "port": args.bridge_port, "video_port": args.bridge_video_port}
     elif args.drone == "crazyflie":
         kw = {"uri": args.uri}
     drone = make_drone(args.drone, **kw) if args.send or args.drone == "sim" else None
@@ -153,13 +157,21 @@ def cmd_fly(args) -> int:
         print("DRY RUN: nothing will fly. Re-run with --send when the drone is in a safe, open space.")
 
     webcam = gestures = None
+    gesture_from_drone = args.input == "drone-gesture"
     if args.input in ("gesture", "both"):
         from .senses import make_gesture_source
         from .senses.webcam import Webcam
 
         webcam = Webcam(args.webcam)
         gestures = make_gesture_source(args.gestures)
-    pilot = Pilot(brain, drone, cfg, gestures=gestures, webcam=webcam)
+    elif gesture_from_drone:
+        from .senses import make_gesture_source
+
+        if not drone.has_camera:
+            raise SystemExit("--input drone-gesture requires a drone camera")
+        gestures = make_gesture_source(args.gestures)
+    pilot = Pilot(brain, drone, cfg, gestures=gestures, webcam=webcam,
+                  gesture_from_drone=gesture_from_drone)
     if args.input == "gesture" and drone.has_camera:
         drone.has_camera = False  # hand only
 
@@ -309,9 +321,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("fly", help="fly a real drone (dry run unless --send)")
     common(sp)
-    sp.add_argument("--drone", choices=["sim", "tello", "crazyflie", "mavlink", "esp32"], default="tello")
-    sp.add_argument("--input", choices=["camera", "gesture", "both"], default="both",
-                    help="camera = drone camera optic flow, gesture = webcam hand, both = both")
+    sp.add_argument("--drone", choices=["sim", "tello", "crazyflie", "mavlink", "esp32", "mavic-air"], default="tello")
+    sp.add_argument("--input", choices=["camera", "gesture", "both", "drone-gesture"], default="both",
+                    help="camera = drone optic flow; gesture = webcam hand; both = both sources; "
+                         "drone-gesture = drone video used for optic flow and hand detection")
     sp.add_argument("--send", action="store_true", help="really send commands to the drone")
     sp.add_argument("--seconds", type=float)
     sp.add_argument("--webcam", default="0")
@@ -319,6 +332,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--mavlink", default="udpin:0.0.0.0:14550")
     sp.add_argument("--autopilot", default="ardupilot", choices=["ardupilot", "px4"])
     sp.add_argument("--esp32-host", default="192.168.4.1")
+    sp.add_argument("--bridge-host", help="Android Mavic Air bridge IP on the private hotspot")
+    sp.add_argument("--bridge-port", type=int, default=45900)
+    sp.add_argument("--bridge-video-port", type=int, default=45902)
     sp.add_argument("--uri", default="radio://0/80/2M/E7E7E7E7E7")
     sp.add_argument("--live", action="store_true")
     sp.add_argument("--log")

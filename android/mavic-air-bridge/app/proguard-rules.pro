@@ -1,0 +1,6 @@
+-keep class dji.** { *; }
+-keep class com.dji.** { *; }
+-dontwarn dji.**
+-dontwarn com.dji.**
+-dontwarn java.lang.management.**
+-dontwarn javax.annotation.**
